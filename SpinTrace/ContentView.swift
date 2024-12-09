@@ -6,19 +6,37 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            BicycleListView()
+                .tabItem {
+                    Label("tab-bicycles", systemImage: "bicycle")
+                }
+            
+//            RideListView()
+//                .tabItem {
+//                    Label("tab-rides", systemImage: "figure.walk")
+//                }
+//            
+//            StatisticsView()
+//                .tabItem {
+//                    Label("tab-stats", systemImage: "chart.bar")
+//                }
+//            
+//            SettingsView()
+//                .tabItem {
+//                    Label("tab-settings", systemImage: "gear")
+//                }
         }
-        .padding()
     }
 }
 
 #Preview {
     ContentView()
+        .modelContainer(for: [Bicycle.self, Ride.self, Service.self, RideCategory.self, ServiceCategory.self])
 }

@@ -12,34 +12,48 @@ import SwiftUI
 @Model
 final class Bicycle : ObservableObject, Identifiable {
     var id: UUID
-    var name: String
+    @Attribute(.unique) var name: String
     var image: Data?
     var purchaseDate: Date
-    var currentMileage: Double
-    var purchasePrice: Decimal
+    var purchaseMileage: Double?
+    var purchasePrice: Decimal?
     var frameNumber: String
     var colorRed: Double
     var colorGreen: Double
     var colorBlue: Double
-    var serviceInterval: Double
+    var serviceInterval: Double?
     var totalMileage: Double {
-        // Logic to calculate total mileage from rides (computed property)
-        return rides.reduce(0) { sum, ride in sum + ride.distance }
-      }
+        let purchaseMileage = purchaseMileage ?? 0 // Fallback auf 0, falls purchaseMileage nil ist
+        let rideMileage = rides.reduce(0) { sum, ride in sum + ride.distance }
+        return purchaseMileage + rideMileage
+    }
     @Relationship(deleteRule: .cascade) var rides: [Ride] = []
     @Relationship(deleteRule: .cascade) var services: [Service] = []
     
-    init(name: String, purchaseDate: Date, currentMileage: Double, purchasePrice: Decimal, frameNumber: String, colorRed: Double, colorGreen: Double, colorBlue: Double, serviceInterval: Double) {
-        self.id = UUID()
+//    init(name: String, purchaseDate: Date, purchaseMileage: Double, purchasePrice: Decimal, frameNumber: String, colorRed: Double, colorGreen: Double, colorBlue: Double, serviceInterval: Double) {
+//        self.id = UUID()
+//        self.name = name
+//        self.purchaseDate = purchaseDate
+//        self.purchaseMileage = purchaseMileage
+//        self.purchasePrice = purchasePrice
+//        self.frameNumber = frameNumber
+//        self.colorRed = colorRed
+//        self.colorGreen = colorGreen
+//        self.colorBlue = colorBlue
+//        self.serviceInterval = serviceInterval
+//    }
+    
+    init(id: UUID = .init(), name: String) {
+        self.id = id
         self.name = name
-        self.purchaseDate = purchaseDate
-        self.currentMileage = currentMileage
-        self.purchasePrice = purchasePrice
-        self.frameNumber = frameNumber
-        self.colorRed = colorRed
-        self.colorGreen = colorGreen
-        self.colorBlue = colorBlue
-        self.serviceInterval = serviceInterval
+        self.purchaseDate = Date() // Standardwert: heutiges Datum
+        self.purchaseMileage = 0 // Standardwert: 0
+        self.purchasePrice = 0 // Standardwert: 0
+        self.frameNumber = "" // Standardwert: leerer String
+        self.colorRed = 0.5 // Standardwert: Mittelwert für Farbe
+        self.colorGreen = 0.5
+        self.colorBlue = 0.5
+        self.serviceInterval = 1000 // Standardwert: 1000 km
     }
 }
 
@@ -50,10 +64,10 @@ final class Ride: Identifiable {
     var averageSpeed: Double
     var caloriesBurned: Double
     var duration: TimeInterval
-    var category: RideCategory
-    var bicycle: Bicycle?
+    @Relationship(deleteRule: .nullify) var category: RideCategory?
+    @Relationship var bicycle: Bicycle
 
-    init(timestamp: Date, distance: Double, averageSpeed: Double, caloriesBurned: Double, duration: TimeInterval, category: RideCategory, bicycle: Bicycle?) {
+    init(timestamp: Date, distance: Double, averageSpeed: Double, caloriesBurned: Double, duration: TimeInterval, category: RideCategory? = nil, bicycle: Bicycle) {
         self.timestamp = timestamp
         self.distance = distance
         self.averageSpeed = averageSpeed
@@ -70,9 +84,9 @@ final class Service: Identifiable {
     var date: Date
     var mileage: Double
     var serviceDescription: String
-    var category: ServiceCategory
+    @Relationship var category: ServiceCategory?
     var cost: Decimal
-    var bicycle: Bicycle?
+    @Relationship var bicycle: Bicycle?
     
     init(date: Date, mileage: Double, serviceDescription: String, category: ServiceCategory, cost: Decimal, bicycle: Bicycle?) {
         self.id = UUID()
@@ -88,18 +102,20 @@ final class Service: Identifiable {
 @Model
 final class RideCategory: Identifiable {
     var id: UUID
-    var name: String
+    @Attribute(.unique) var name: String
+    var orderIndex: Int // Zum Speichern der Sortierreienfolge
     
-    init(name: String) {
+    init(name: String, orderIndex: Int = 0) {
         self.id = UUID()
         self.name = name
+        self.orderIndex = orderIndex
     }
 }
 
 @Model
 final class ServiceCategory: Identifiable {
     var id: UUID
-    var name: String
+    @Attribute(.unique) var name: String
     
     init(name: String) {
         self.id = UUID()

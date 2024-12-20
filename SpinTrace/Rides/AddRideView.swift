@@ -13,8 +13,10 @@ struct AddRideView: View {
     @Environment(\.dismiss) var dismiss
     
     @Bindable var bicycle: Bicycle
+    var isEditable: Bool  // Steuerung, ob der Picker angezeigt wird
     
     @Query(sort: \RideCategory.orderIndex, order: .forward) private var categories: [RideCategory]
+    @Query private var bicycles: [Bicycle]
     
     @State private var timestamp = Date()
     @State private var distance: Double = 0
@@ -22,6 +24,7 @@ struct AddRideView: View {
     @State private var caloriesBurned: Double = 0
     @State private var duration: TimeInterval = 0
     @State private var selectedCategory: RideCategory?  // Speichert die ausgewählte Kategorie
+    @State private var selectedBicycle: Bicycle?
     
     var body: some View {
         NavigationView {
@@ -68,13 +71,32 @@ struct AddRideView: View {
                 }
                 Section("Category") {
                                     Picker("Select Category", selection: $selectedCategory) {
-//                                        Text("No category").tag(nil as RideCategory?)
                                         ForEach(categories) { category in
                                             Text(category.name).tag(category as RideCategory?)
                                         }
                                     }
-                                    .pickerStyle(.navigationLink)
+                                    .pickerStyle(.menu)
                                 }
+                Section("Bicycle") {
+                    if isEditable {
+                        Picker("Select Bicycle", selection: $selectedBicycle) {
+                            ForEach(bicycles) { bicycle in
+                                Text(bicycle.name)
+                                    .tag(bicycle as Bicycle?)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    } else {
+                        // Zeigt nur den Namen des übergebenen Fahrrads an
+                        HStack {
+                            Label("Bicycle", systemImage: "bicycle")
+                            Spacer()
+                            Text(bicycle.name)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
             }
             .navigationTitle("Add Ride")
             .toolbar {
@@ -119,6 +141,6 @@ struct AddRideView: View {
     let container = try! ModelContainer(for: Bicycle.self, configurations: config)
     let bicycle = Bicycle(name: "Test Bike")
     container.mainContext.insert(bicycle)
-    return AddRideView(bicycle: bicycle)
+    return AddRideView(bicycle: bicycle, isEditable: true)
         .modelContainer(container)
 } 

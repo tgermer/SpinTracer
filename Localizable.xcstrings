@@ -269,6 +269,9 @@
         }
       }
     },
+    "No bicycles available. Please add a bicycle first." : {
+
+    },
     "No Rides" : {
       "localizations" : {
         "de" : {
@@ -368,6 +371,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Speichern"
+          }
+        }
+      }
+    },
+    "Select Bicycle" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrrad auswählen"
           }
         }
       }

@@ -165,7 +165,7 @@ struct BicycleDetailView: View {
 
         }
         .sheet(isPresented: $isAddingRide) {
-            AddRideView(bicycle: bicycle)
+            AddRideView(bicycle: bicycle, isEditable: false)
         }
         .navigationTitle(bicycle.name)
         .navigationBarTitleDisplayMode(.inline)
